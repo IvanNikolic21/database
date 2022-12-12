@@ -12,3 +12,4 @@ TODO list:
          it into 21CMMC.
     -    Add HERA likelihood!
     -    discuss some mcmc options.
+    -    add my zeus and my 21cmfast and my 21cmmc to environment file
