@@ -99,8 +99,21 @@ class Prior(LikelihoodBase):
 
 lf_zs = [6, 7, 8, 10] 
 forest_zs = [5.0, 5.2, 5.4, 5.6, 5.8, 6.0]
+coeval_zs = [5,6,7,8,9,10]
 
-core = [ 
+core = [
+    CoreCoevalModule(
+        redshift = redshift,
+        user_params = user_params,
+        cosmo_params = cosmo_params,
+        flag_options = flag_options,
+        global_params = global_params,
+        regenerate = False,
+        initial_conditions_seed  = inputs.initial_seed,
+        cache_dir = my_cache,
+        cache_mcmc = False,
+    ) for redshift in coeval_zs
+] + [ 
     CoreLightConeModule(
         redshift=4.9,
         max_redshift=15,

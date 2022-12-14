@@ -146,4 +146,5 @@ dependencies:
     - tox==3.12.1
     - webencodings==0.5.1
     - git+https://github.com/IvanNikolic21/21cmFAST.git@with_ksz
-    - git+https://github.com/IvanNikolic21/zeus.git 
+    - git+https://github.com/IvanNikolic21/zeus.git
+    - git+https://github.com/IvanNikolic21/21CMMC.git@dataset 
