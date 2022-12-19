@@ -58,6 +58,7 @@ flag_options = {
     'INHOMO_RECO': True,
     'PHOTON_CONS': True,
     'EVOLVING_R_BUBBLE_MAX': True, #This parameter is not present in master!
+    'USE_TS_FLUCT': True,
 }
 
 global_params = {
@@ -97,8 +98,9 @@ class Prior(LikelihoodBase):
     def computeLikelihood(self, model):
         return -0.5 * ((model[0] / 5)**2 + (model[1] / 2.5)**2)
 
+lf_zs_saved = [6,7,8,9,10,12,15]
 lf_zs = [6, 7, 8, 10] 
-forest_zs = [5.0, 5.2, 5.4, 5.6, 5.8, 6.0]
+forest_zs = [5.4, 5.6, 5.8, 6.0] # note the change in redshifts
 coeval_zs = [5,6,7,8,9,10]
 
 core = [
@@ -139,7 +141,7 @@ core = [
         initial_conditions_seed = inputs.initial_seed,
         cache_dir=my_cache,
         cache_mcmc=False)
-    for redshift in lf_zs
+    for redshift in lf_zs_saved #note that these are more than calculated in likelihood.
 ] + [
     CoreForest( 
         redshift=redshift,
