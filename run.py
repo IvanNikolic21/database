@@ -160,8 +160,7 @@ core = [
 
 #likelihood modules
 likelihood = [ 
-    LikelihoodPlanck(),
-    LikelihoodNeutralFraction(),
+    LikelihoodPlanck(),   # no LikelihoodNeutralFraction!
 ] + [
     LikelihoodLuminosityFunction(name='lfz%d'%redshift, simulate = False,),
     for redshift in lf_zs
@@ -169,6 +168,8 @@ likelihood = [
     LikelihoodForest(name='bosman%s'%(str(redshift).replace('.', 'pt')))
     for redshift in forest_zs
 ]
+
+#HERA likelihood to be added.
 
 #parameters with their Gaussian initial ball options
 param_dict = {
