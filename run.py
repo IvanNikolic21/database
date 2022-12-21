@@ -37,8 +37,8 @@ logger.setLevel(logging.INFO)
 
 #main parameter combinations:
 user_params = {
-    'HII_DIM':128,
-    'BOX_LEN':250.0,
+    'HII_DIM':200.0,
+    'BOX_LEN':400.0,  #note the change
     'USE_INTERPOLATION_TABLES': True,
     'USE_FFTW_WISDOM': True,
     'PERTURB_ON_HIGH_RES': True,
