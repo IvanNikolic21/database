@@ -59,6 +59,7 @@ flag_options = {
     'PHOTON_CONS': True,
     'EVOLVING_R_BUBBLE_MAX': True, #This parameter is not present in master!
     'USE_TS_FLUCT': True,
+    'USE_MINI_HALOS': True,
 }
 
 global_params = {
@@ -175,8 +176,7 @@ likelihood = [
 param_dict = {
     'F_STAR10' : [-1.3, -2, -0.5, 0.5],
     'ALPHA_STAR' : [0.5, 0.0, 1.0, 0.5],
-    'M_TURN' : [8.5, 7.0, 10.0, 1.0],
-    't_STAR' : [0.5, 0.01, 1.0, 0.2],
+    't_STAR' : [0.5, 0.01, 1.0, 0.2],        #removed M_turn as it's already calculated.
     'F_ESC10' : [-1.0, -3.0, 0.0, 1.0],
     'ALPHA_ESC' : [-0.2, -1.0, 1.0, 0.8],
     'SIGMA_8' : [0.8118, 0.75, 0.85, 0.01], #Gaussian initiall ball here corresponds to Planck 68% CI
