@@ -4,13 +4,13 @@ import argparse
 #All else will be specified in the bash script.
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-- workers", type = int, default = 1)
-parser.add_argument("-- threads_per_sim", type = int, default = 1)
-parser.agg_argument("-- initial_seed", type = int, default = 1950)
+parser.add_argument("--workers", type = int, default = 1)
+parser.add_argument("--threads_per_sim", type = int, default = 1)
+parser.add_argument("--initial_seed", type = int, default = 1950)
+parser.add_argument("--directory", type = str, default = "./")
 inputs = parser.parse_args()
 
 import os
-
 #initialize environment variables
 
 os.environ['OPENBLAS_NUM_THREADS'] = str(inputs.workers)
@@ -24,7 +24,7 @@ import logging, sys
 
 from py21cmmc import mcmc
 from py21cmmc import LikelihoodNeutralFraction
-from py21cmmc import CoreLightConeModule
+from py21cmmc import CoreLightConeModule, CoreCoevalModule
 from py21cmmc import LikelihoodLuminosityFunction, CoreLuminosityFunction
 from py21cmmc import LikelihoodForest, CoreForest
 from py21cmmc import LikelihoodPlanck
@@ -37,13 +37,15 @@ logger.setLevel(logging.INFO)
 
 #main parameter combinations:
 user_params = {
-    'HII_DIM':200.0,
-    'BOX_LEN':400.0,  #note the change
+    'HII_DIM':128,
+    'BOX_LEN':256,  #note the change
     'USE_INTERPOLATION_TABLES': True,
     'USE_FFTW_WISDOM': True,
     'PERTURB_ON_HIGH_RES': True,
     'N_THREADS': inputs.threads_per_sim,
     'OUTPUT_ALL_VEL': False,  #for kSZ need to save all velocity components.
+    'USE_RELATIVE_VELOCITIES' : True,
+    'POWER_SPECTRUM': 5,
 }
 
 cosmo_params = { 
@@ -56,7 +58,7 @@ cosmo_params = {
 flag_options = {
     'USE_MASS_DEPENDENT_ZETA': True,
     'INHOMO_RECO': True,
-    'PHOTON_CONS': True,
+    'PHOTON_CONS': False,          #It says that mini-haloes are not consistent with photo_cons
     'EVOLVING_R_BUBBLE_MAX': True, #This parameter is not present in master!
     'USE_TS_FLUCT': True,
     'USE_MINI_HALOS': True,
@@ -64,7 +66,7 @@ flag_options = {
 
 global_params = {
     'Z_HEAT_MAX': 15.0, 
-    'T_RE': 1e4,
+    'T_RE': 2e4,
     'ALPHA_UVB': 2.0,
     'PhotonConsEndCalibz':3.5
 }
@@ -72,7 +74,7 @@ global_params = {
 #21cmFAST cache settings
 import py21cmfast as p21c
 
-my_cache='./_cache/'    #update this to the desired _cache directory.
+my_cache = '/home/inikoli/lustre/run_directory/_cache'  #update this to the desired _cache directory.
 if not os.path.exists(my_cache):
     os.mkdir(my_cache)
 
@@ -105,18 +107,6 @@ forest_zs = [5.4, 5.6, 5.8, 6.0] # note the change in redshifts
 coeval_zs = [5,6,7,8,9,10]
 
 core = [
-    CoreCoevalModule(
-        redshift = redshift,
-        user_params = user_params,
-        cosmo_params = cosmo_params,
-        flag_options = flag_options,
-        global_params = global_params,
-        regenerate = False,
-        initial_conditions_seed  = inputs.initial_seed,
-        cache_dir = my_cache,
-        cache_mcmc = False,
-    ) for redshift in coeval_zs
-] + [ 
     CoreLightConeModule(
         redshift=4.9,
         max_redshift=15,
@@ -127,8 +117,22 @@ core = [
         regenerate=False,
         initial_conditions_seed = inputs.initial_seed,
         cache_dir=my_cache,
+        output_dir = inputs.directory + '/output/',
         cache_mcmc=False)
     ,
+] + [
+    CoreCoevalModule(
+        redshift = coeval_zs,
+        user_params = user_params,
+        cosmo_params = cosmo_params,
+        flag_options = flag_options,
+        global_params = global_params,
+        regenerate = False,
+        initial_conditions_seed  = inputs.initial_seed,
+        cache_dir = my_cache,
+        output_dir = inputs.directory + '/output/',
+        cache_mcmc = False,
+    ),
 ] + [
     CoreLuminosityFunction(
         redshift=redshift,
@@ -141,6 +145,7 @@ core = [
         regenerate=False,
         initial_conditions_seed = inputs.initial_seed,
         cache_dir=my_cache,
+        output_dir = inputs.directory + '/output/',
         cache_mcmc=False)
     for redshift in lf_zs_saved #note that these are more than calculated in likelihood.
 ] + [
@@ -155,6 +160,7 @@ core = [
         regenerate=False,
         initial_conditions_seed = inputs.initial_seed,
         cache_dir=my_cache,
+        output_dir = inputs.directory + '/output/',
         cache_mcmc=False
     ) for redshift in forest_zs
 ]
@@ -163,7 +169,7 @@ core = [
 likelihood = [ 
     LikelihoodPlanck(),   # no LikelihoodNeutralFraction!
 ] + [
-    LikelihoodLuminosityFunction(name='lfz%d'%redshift, simulate = False,),
+    LikelihoodLuminosityFunction(name='lfz%d'%redshift, simulate = False,)
     for redshift in lf_zs
 ] + [
     LikelihoodForest(name='bosman%s'%(str(redshift).replace('.', 'pt')))
@@ -180,8 +186,8 @@ param_dict = {
     'F_ESC10' : [-1.0, -3.0, 0.0, 1.0],
     'ALPHA_ESC' : [-0.2, -1.0, 1.0, 0.8],
     'SIGMA_8' : [0.8118, 0.75, 0.85, 0.01], #Gaussian initiall ball here corresponds to Planck 68% CI
-    'F_STAR7' : [-2.75, -4.0, -1.0, 1.0],
-    'F_ESC7' : [-1.2, -3.0, -1.0, 1.0], #Based on YQ+20
+    'F_STAR7_MINI' : [-2.75, -4.0, -1.0, 1.0],
+    'F_ESC7_MINI' : [-1.2, -3.0, -1.0, 1.0], #Based on YQ+20
     'L_X' : [40.5, 38.0, 42.0, 0.1],
     'NU_X_THRESH' : [500, 100, 1500, 300],
     'log10_f_rescale' : [0.0, -5.0, 5.0, 5],
@@ -197,9 +203,10 @@ mcmc_options = {
     'mpi_chains': 32,    #number of chains is also gonna depend on the choice. Probably a chain per
                          #node makes sense.
     'store_progress': True,
+    'use_mpi': True,
     'continue_sampling': False, # to be changed with further submissions
     'save_after_iter': 1,       #TODO, implement this!
-    'folder' : r'./',           #to be changed.
+    'folder' : inputs.directory + "/output/",           #to be changed.
     'param_names': param_dict.keys(),
 }
 
@@ -209,6 +216,7 @@ chain = mcmc.run_mcmc(
     model_name=model_name,
     params = param_dict ,
     use_zeus = True,
+    use_mpi = True,
     **mcmc_options
 )
 
