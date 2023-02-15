@@ -8,7 +8,9 @@ time_start = time.time()
 
 import numpy as np
 from astropy import cosmology
-from .save import HDF5saver
+import sys
+sys.path.append('/mnt/lustre/users/inikoli/run_directory/')
+import save as save
 import logging, sys
 
 from py21cmmc import mcmc
@@ -19,6 +21,7 @@ from py21cmmc import LikelihoodForest, CoreForest
 from py21cmmc import LikelihoodPlanck
 from py21cmmc import LikelihoodBase
 from py21cmmc import CoreCoevalModule
+from py21cmfast import AstroParams, CosmoParams
 #set logger from 21cmFAST
 
 logger = logging.getLogger('21cmFAST')
@@ -31,7 +34,7 @@ user_params = {
     'USE_INTERPOLATION_TABLES': True,
     'USE_FFTW_WISDOM': True,
     'PERTURB_ON_HIGH_RES': True,
-    'N_THREADS': 8,
+    'N_THREADS': 16,
     'OUTPUT_ALL_VEL': False,  #for kSZ need to save all velocity components.
     'USE_RELATIVE_VELOCITIES' : True,
     'POWER_SPECTRUM': 5,
@@ -93,7 +96,7 @@ lf_zs_saved = [6,7,8,9,10,12,15]
 lf_zs = [6, 7, 8, 10] 
 forest_zs = [5.4, 5.6, 5.8, 6.0] # note the change in redshifts
 coeval_zs = [5,6,7,8,9,10]
-
+container = None
 
 while True:
     seed_now = np.random.randint(low=0, high=2**32-1)
@@ -112,44 +115,58 @@ while True:
        "velocity",
        "brightness_temp",
     )
-    output_dir = '/home/inikoli/lustre/run_directory/output'
+    output_dir = '/home/inikoli/lustre/run_directory/output/'
 
+#    astro_params = {
+#        'F_STAR10' : params_this[0],
+#        'ALPHA_STAR' : params_this[1],
+#        't_STAR' : params_this[2],
+#        'F_ESC10' : params_this[3],
+#        'ALPHA_ESC' : params_this[4],
+#        'F_STAR7_MINI' : params_this[6],
+#        'F_ESC7_MINI' : params_this[7],
+#        'L_X' : params_this[8],
+#        'NU_X_THRESH' : params_this[9],
+#    }
     astro_params = {
-        'F_STAR10' : params_this[0],
-        'ALPHA_STAR' : params_this[1],
-        't_STAR' : params_this[2],
-        'F_ESC10' : params_this[3],
-        'ALPHA_ESC' : params_this[4],
-        'F_STAR7' : params_this[6],
-        'F_ESC7' : params_this[7],
-        'L_X' : params_this[8],
-        'NU_X_THRESH' : params_this[9],
+        'F_STAR10' : -1.30,
+        'ALPHA_STAR' : 0.5,
+        't_STAR' : 0.44,
+        'F_ESC10': -1.3,
+        'ALPHA_ESC' : -0.1,
+        'F_STAR7_MINI' : -2.20,
+        'F_ESC7_MINI' : -2.1,
+        'L_X' : 41.0,
+        'NU_X_THRESH' : 700,
     }
-    cosmo_params['SIGMA_8'] = params_this[5]
-    log10_f_rescale_now = params_this[10]
-    f_rescale_slope = params_this[11]
-
-    parameter_names = astro_params.keys() + ['SIGMA_8', 'log10_f_rescale', 'f_rescale_slope']
-
+    #cosmo_params['SIGMA_8'] = params_this[5]
+    #log10_f_rescale_now = params_this[10]
+    #f_rescale_slope_now = params_this[11]
+    log10_f_rescale_now = 0.0
+    f_rescale_slope_now = 0.0
+    cosmo_params['SIGMA_8'] = 0.8118
+    parameter_names = list(astro_params.keys()) + ['SIGMA_8', 'log10_f_rescale', 'f_rescale_slope']
+    astro_params_now = AstroParams(astro_params)
+    cosmo_params_now = CosmoParams(cosmo_params)
     try:
-        container
+        
         if not container.check_params(astro_params,
                                         cosmo_params):
             container = None
-            container = HDF5saver(
-                astro_params,
-                cosmo_params,
+            container = save.HDF5saver(
+                astro_params_now,
+                cosmo_params_now,
                 parameter_names,
                 output_dir,
                 log10_f_rescale_now,
                 f_rescale_slope_now
             )
 
-    except (NameError, AttributeError) as e:
+    except AttributeError as e:
 
-        container = HDF5saver(
-            astro_params,
-            cosmo_params,
+        container = save.HDF5saver(
+            astro_params_now,
+            cosmo_params_now,
             parameter_names,
             output_dir,
             log10_f_rescale_now,
@@ -160,28 +177,29 @@ while True:
 
     init_seed_now = np.random.randint(low=0, high=2**32-1)
     container.add_rstate(init_seed_now)
-
+    print("starting to run coeval")
     coeval = p21c.run_coeval(
         redshift=coeval_zs,
-        astro_params=astro_params,
-        cosmo_params=cosmo_params,
-        flag_options=flag_options,
-        user_params=user_params,
-        regenerate=False,
+#        astro_params=astro_params_now,
+#        cosmo_params=cosmo_params_now,
+#        flag_options=flag_options,
+#        user_params=user_params,
+#        regenerate=False,
         random_seed=init_seed_now,
-        write=my_cache,
-        direc=my_cache,
-        **global_params,
+#        write=my_cache,
+#        direc=my_cache,
+#        **global_params,
     )
-
+    print("ended coeval, starting lightcone")
     lightcone = p21c.run_lightcone(
         redshift=4.9,
         max_redshift=15,
-        user_params=user_params,
-        cosmo_params=cosmo_params,
-        astro_params=astro_params,
-        flag_options=flag_options,
-        lightcone_quantities=lightcone_quantities,
+#        user_params=user_params,
+#        cosmo_params=cosmo_params_now,
+#        astro_params=astro_params_now,
+#        flag_options=flag_options,
+#        lightcone_quantities=lightcone_quantities,
         random_seed=np.random.randint(low = 0, high = 2**32 -1),
-        global_quantities=lightcone_quantities,
+#        global_quantities=lightcone_quantities,
     )
+    print("ended lightcone, starting frest")
