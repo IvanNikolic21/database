@@ -174,7 +174,7 @@ n_realization = 150 #for forest
 observation="bosman_optimistic"
 
 data_forest = np.load(
-        path.join(path.dirname(__file__), "data/Forests/Bosman18/data.npz"),
+        path.join(path.dirname(py21cmmc.__file__), "data/Forests/Bosman18/data.npz"),
         allow_pickle=True,
     )
 
