@@ -458,8 +458,67 @@ while True:
         datafile = [
             path.join(path.dirname(__file__), "data/Forests/Bosman18/data.npz")
         ]
-        
-###FINISHED FOREST, but not saving any of it.
+        noisefile = [
+            path.join(
+                path.dirname(__file__),
+                "data/Forests/Bosman18/PDF_ErrorCovarianceMatrix_GP/z%s.npy"
+                % str(z_forest).replace(".", "pt"),
+            )
+        ]
+        data  = []
+        for fl in datafile:
+            if not path.exists(fl):
+                raise ValueError
+            else:
+                data.append(dict(np.load(fl, allow_pickle=True)))
+        targets = np.where(
+            (data["zs"] > (z_forest - 0.1))
+            * (data["zs"] <= (z_forest + 0.1))
+        )[0]
+        pdfs_data = np.zeros([2, hist_bin_size])
+
+        pdfs_data[0] = np.histogram(
+            data["tau_lower"][targets], range=tau_range,
+            bins=hist_bin_size
+        )[0]
+
+        pdfs_data[1] = np.histogram(
+            data["tau_upper"][targets], range=tau_range,
+            bins=hist_bin_size
+        )[0]
+        noise = []
+        for fl in noisefile:
+            if not path.exists(fl):
+                raise ValueError
+            else:
+                noise.append(dict(np.load(fl, allow_pickle=True)))
+        ErrorCovarianceMatrix_GP = noise[0]
+
+        pdfs_model = np.zeros([n_realization, hist_bin_size])
+        for jj in range(n_realization):
+            pdfs_model[jj] = np.histogram(
+                tau_eff[jj], range=tau_range, bins=hist_bin_size
+            )[0]
+        tau_eff_model = np.mean(pdfs_model, axis=0)
+        ecm_cosmic = np.cov(pdfs_model.T)
+        noise = (
+            ErrorCovarianceMatrix_GP + ecm_cosmic + np.diag(np.ones(hist_bin_size) * 1e-5)
+        )
+        container.add_forest_pdfs(pdfs_model, z_forest)
+        det = np.linalg.det(noise)
+        if det == 0 or tau_eff is None:
+            lnl = -np.inf
+        diff = tau_eff_model - pdfs_data[0]
+        for ii in np.where(pdfs_data[0] != pdfs_data[1])[0]:
+            if tau_eff_model[ii] < pdfs_data[0][ii]:
+                diff[ii] = min(0, tau_eff_model[ii] - pdfs_data[1][ii])
+        diff = diff.reshape([1, -1])
+        lnl = (
+            -0.5 * np.linalg.multi_dot([diff, np.linalg.inv(noise), diff.T])[0, 0]
+        )
+        if det < 0:
+            lnl = -np.inf
+        container.add_forest_likelihood(lnl, z_forest)
 
 ###STARTING CMB
     if lightcone is not None:
@@ -481,4 +540,9 @@ while True:
                             tau_value - tau_mean_CMB)
         )
         container.add_tau_likelihood(tau_e_likelihood)
-###END OF CMB
+
+    ###END OF CMB, CLEANING EVERYTHING UP
+
+    del container
+    for index_rm, file_rm in glob.glob(my_cache + '/*' + str(init_seed_now) + '.h5'):
+        os.system('rm '+ file_rm)
