@@ -1,4 +1,5 @@
 import os
+from os import path
 import time
 import glob
 #initialize environment variables
@@ -6,13 +7,13 @@ time_start = time.time()
 #os.environ['OPENBLAS_NUM_THREADS'] = str(1)
 #os.environ['OMP_NUM_THREADS'] = str(1)
 
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
 import numpy as np
 from astropy import cosmology
 import sys
 sys.path.append('/mnt/lustre/users/inikoli/run_directory/')
 import save as save
-import logging, sys
+import logging
 
 from py21cmmc import mcmc
 from py21cmmc import LikelihoodNeutralFraction
@@ -131,6 +132,7 @@ def tau_GP(self, gamma_bg, delta, temp, redshifts, cosmo_params):
     )
 
 import py21cmfast as p21c
+from py21cmfast import wrapper as lib
 
 my_cache='/home/inikoli/lustre/run_directory/_cache'    #update this to the desired _cache directory.
 if not os.path.exists(my_cache):
@@ -159,6 +161,7 @@ class Prior(LikelihoodBase):
     def computeLikelihood(self, model):
         return -0.5 * ((model[0] / 5)**2 + (model[1] / 2.5)**2)
 
+mag_brightest = -20.0
 lf_zs_saved = [6,7,8,9,10,12,15]
 lf_zs = [6, 7, 8, 10] 
 forest_zs = [5.4, 5.6, 5.8, 6.0] # note the change in redshifts
@@ -329,6 +332,34 @@ while True:
 
         container.add_UV((Muv, lfunc, mhalo), z_uv)
 
+        if z_uv in lf_zs:
+            datafile = [
+                path.join(
+                    path.dirname(__file__),
+                    "data",
+                    "LF_lfuncs_z%d.npz" % z_uv,
+                )
+            ]
+            noisefile = [
+                path.join(
+                    path.dirname(__file__),
+                    "data",
+                    "LF_sigmas_z%d.npz" % z_uv,
+                )
+            ]
+            data = []
+            for fl in datafile:
+                if not path.exists(fl):
+                    raise ValueError
+                else:
+                    data.append(dict(np.load(fl, allow_pickle=True)))
+            noise = []
+            for fl in noisefile:
+                if not path.exists(fl):
+                    raise ValueError
+                else:
+                    noise.append(dict(np.load(fl, allow_pickle=True)))
+
 ####FOREST
 
     for index_forest, z_forest in enumerate(forest_zs):
@@ -395,9 +426,26 @@ while True:
 
                 tau_eff[jj] = -np.log(
                     np.mean(np.exp(-tau_lyman_alpha * f_rescale_proper), axis=1))
-
 ###FINISHED FOREST, but not saving any of it.
 
 ###STARTING CMB
     if lightcone is not None:
         redshifts_CMB, xHI_CMB = np.sort(np.array([lightcone.node_redshifts, lightcone.global_xHI]))
+        neutral_frac_func = InterpolatedUnivariateSpline(redshifts_CMB, xHI_CMB, k=1)
+        z_extrap = np.linspace(z_extrap_min, z_extrap_max, n_z_interp)
+        xHI_CMB = neutral_frac_func(z_extrap)
+        np.clip(xHI_CMB, 0, 1, xHI_CMB)
+        tau_value = lib.compute_tau(
+            user_params=+user_params,
+            cosmo_params=cosmo_params_now,
+            redshifts=z_extrap,
+            global_xHI=xHI_CMB,
+        )
+        container.add_tau(tau_value)
+        tau_e_likelihood = -0.5 * np.square(tau_mean_CMB - tau_value) / (
+                tau_sigma_u_CMB * tau_sigma_l_CMB
+                + (tau_sigma_u_CMB - tau_sigma_l_CMB) * (
+                            tau_value - tau_mean_CMB)
+        )
+        container.add_tau_likelihood(tau_e_likelihood)
+###END OF CMB
