@@ -6,6 +6,7 @@ time_start = time.time()
 #os.environ['OPENBLAS_NUM_THREADS'] = str(1)
 #os.environ['OMP_NUM_THREADS'] = str(1)
 
+from scipy.interpolate import interp1d
 import numpy as np
 from astropy import cosmology
 import sys
@@ -97,6 +98,7 @@ lf_zs = [6, 7, 8, 10]
 forest_zs = [5.4, 5.6, 5.8, 6.0] # note the change in redshifts
 coeval_zs = [5,6,7,8,9,10]
 container = None
+n_muv_bins = 100
 
 while True:
     seed_now = np.random.randint(low=0, high=2**32-1)
@@ -218,5 +220,23 @@ while True:
             lightcone.global_xH
         )
         container.add_lightcones(lightcone)
+    for index_uv, z_uv in enumerate(lf_zs_saved):
+        mturnovers = 10 ** interp1d(np.array(lightcone.node_redshifts)[::-1], np.array(lightcone.log10_mturnovers))(
+            z_uv
+        )
+        mturnovers_mini = 10 ** interp1d(
+                np.array(lightcone.node_redshifts)[::-1], np.array(lightcone.log10_mturnovers_mini)[::-1]
+            )(z_uv)
+
+        uvlf_all = p21.compute_luminosity_function(
+                mturnovers=mturnovers,
+                mturnovers_mini=mturnovers_mini,
+                redshifts=z_uv,
+                astro_params=astro_params_now,
+                flag_options=flag_options,
+                cosmo_params=cosmo_params_now,
+                user_params=self.user_params,
+                nbins=n_muv_bins,
+            )
 
 
