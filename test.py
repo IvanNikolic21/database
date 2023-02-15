@@ -117,34 +117,34 @@ while True:
     )
     output_dir = '/home/inikoli/lustre/run_directory/output/'
 
-#    astro_params = {
-#        'F_STAR10' : params_this[0],
-#        'ALPHA_STAR' : params_this[1],
-#        't_STAR' : params_this[2],
-#        'F_ESC10' : params_this[3],
-#        'ALPHA_ESC' : params_this[4],
-#        'F_STAR7_MINI' : params_this[6],
-#        'F_ESC7_MINI' : params_this[7],
-#        'L_X' : params_this[8],
-#        'NU_X_THRESH' : params_this[9],
-#    }
     astro_params = {
-        'F_STAR10' : -1.30,
-        'ALPHA_STAR' : 0.5,
-        't_STAR' : 0.44,
-        'F_ESC10': -1.3,
-        'ALPHA_ESC' : -0.1,
-        'F_STAR7_MINI' : -2.20,
-        'F_ESC7_MINI' : -2.1,
-        'L_X' : 41.0,
-        'NU_X_THRESH' : 700,
+        'F_STAR10' : params_this[0],
+        'ALPHA_STAR' : params_this[1],
+        't_STAR' : params_this[2],
+        'F_ESC10' : params_this[3],
+        'ALPHA_ESC' : params_this[4],
+        'F_STAR7_MINI' : params_this[6],
+        'F_ESC7_MINI' : params_this[7],
+        'L_X' : params_this[8],
+        'NU_X_THRESH' : params_this[9],
     }
-    #cosmo_params['SIGMA_8'] = params_this[5]
-    #log10_f_rescale_now = params_this[10]
-    #f_rescale_slope_now = params_this[11]
-    log10_f_rescale_now = 0.0
-    f_rescale_slope_now = 0.0
-    cosmo_params['SIGMA_8'] = 0.8118
+#    astro_params = {
+#        'F_STAR10' : -1.30,
+#        'ALPHA_STAR' : 0.5,
+#        't_STAR' : 0.44,
+#        'F_ESC10': -1.3,
+#        'ALPHA_ESC' : -0.1,
+#        'F_STAR7_MINI' : -2.20,
+#        'F_ESC7_MINI' : -2.1,
+#        'L_X' : 41.0,
+#        'NU_X_THRESH' : 700,
+#    }
+    cosmo_params['SIGMA_8'] = params_this[5]
+    log10_f_rescale_now = params_this[10]
+    f_rescale_slope_now = params_this[11]
+    #log10_f_rescale_now = 0.0
+    #f_rescale_slope_now = 0.0
+    #cosmo_params['SIGMA_8'] = 0.8118
     parameter_names = list(astro_params.keys()) + ['SIGMA_8', 'log10_f_rescale', 'f_rescale_slope']
     astro_params_now = AstroParams(astro_params)
     cosmo_params_now = CosmoParams(cosmo_params)
@@ -180,26 +180,43 @@ while True:
     print("starting to run coeval")
     coeval = p21c.run_coeval(
         redshift=coeval_zs,
-#        astro_params=astro_params_now,
-#        cosmo_params=cosmo_params_now,
-#        flag_options=flag_options,
-#        user_params=user_params,
-#        regenerate=False,
+        astro_params=astro_params_now,
+        cosmo_params=cosmo_params_now,
+        flag_options=flag_options,
+        user_params=user_params,
+        regenerate=False,
         random_seed=init_seed_now,
-#        write=my_cache,
-#        direc=my_cache,
-#        **global_params,
+        write=my_cache,
+        direc=my_cache,
+        **global_params,
     )
+    for z, c in enumerate(coeval):
+        container.add_coevals(self.redshift[z], c)
     print("ended coeval, starting lightcone")
-    lightcone = p21c.run_lightcone(
+    lightcone,PS = p21c.run_lightcone(
         redshift=4.9,
         max_redshift=15,
-#        user_params=user_params,
-#        cosmo_params=cosmo_params_now,
-#        astro_params=astro_params_now,
-#        flag_options=flag_options,
-#        lightcone_quantities=lightcone_quantities,
-        random_seed=np.random.randint(low = 0, high = 2**32 -1),
-#        global_quantities=lightcone_quantities,
+        user_params=user_params,
+        cosmo_params=cosmo_params_now,
+        astro_params=astro_params_now,
+        flag_options=flag_options,
+        rotation_cubes=False,
+        coeval_callback=lambda x: ps_coeval(x, 50),
+        lightcone_quantities=lightcone_quantities,
+        random_seed=init_seed_now,
+        global_quantities=lightcone_quantities,
+        write = my_cache,
+        direc = my_cache,
+        **global_params,
     )
     print("ended lightcone, starting frest")
+    if lightcone is not None:
+        container.add_PS(
+            PS, lightcone.node_redshifts  # post-processing is done in save.py
+        )
+        container.add_global_xH(
+            lightcone.global_xH
+        )
+        container.add_lightcones(lightcone)
+
+
