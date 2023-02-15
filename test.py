@@ -15,6 +15,7 @@ sys.path.append('/mnt/lustre/users/inikoli/run_directory/')
 import save as save
 import logging
 
+import py21cmmc
 from py21cmmc import mcmc
 from py21cmmc import LikelihoodNeutralFraction
 from py21cmmc import CoreLightConeModule
@@ -335,14 +336,14 @@ while True:
         if z_uv in lf_zs:
             datafile = [
                 path.join(
-                    path.dirname(__file__),
+                    path.dirname(py21cmmc.__file__),
                     "data",
                     "LF_lfuncs_z%d.npz" % z_uv,
                 )
             ]
             noisefile = [
                 path.join(
-                    path.dirname(__file__),
+                    path.dirname(py21cmmc.__file__),
                     "data",
                     "LF_sigmas_z%d.npz" % z_uv,
                 )
@@ -456,11 +457,11 @@ while True:
             (tau_range[1] - tau_range[0]) / hist_bin_width
         )
         datafile = [
-            path.join(path.dirname(__file__), "data/Forests/Bosman18/data.npz")
+            path.join(path.dirname(py21cmmc.__file__), "data/Forests/Bosman18/data.npz")
         ]
         noisefile = [
             path.join(
-                path.dirname(__file__),
+                path.dirname(py21cmmc.__file__),
                 "data/Forests/Bosman18/PDF_ErrorCovarianceMatrix_GP/z%s.npy"
                 % str(z_forest).replace(".", "pt"),
             )
