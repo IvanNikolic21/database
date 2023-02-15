@@ -359,6 +359,29 @@ while True:
                     raise ValueError
                 else:
                     noise.append(dict(np.load(fl, allow_pickle=True)))
+            for key, val in data[0].items():
+                if not hasattr(val[0], "__len__"):
+                    data[0][key] = np.atleast_2d(val)
+            for key, val in noise[0].items():
+                if not hasattr(val[0], "__len__"):
+                    noise[0][key] = np.atleast_2d(val)
+
+            data = data[0]
+            noise = noise[0]
+            lnl = 0
+            model_spline =  InterpolatedUnivariateSpline(
+                Muv[::-1], lfunc[::-1]
+            )
+            lnl += -0.5 * np.sum(
+                (
+                    (data["lfunc"] - 10 ** model_spline(data["Muv"]))
+                    ** 2
+                    / noise["sigma"] ** 2
+                )[data["Muv"] > mag_brightest]
+            )
+            container.add_uvlf_likelihood(lnl, z_uv)
+            print("This it uvlnl for ", z_uv, ":" ,lnl)
+
 
 ####FOREST
 
@@ -426,6 +449,16 @@ while True:
 
                 tau_eff[jj] = -np.log(
                     np.mean(np.exp(-tau_lyman_alpha * f_rescale_proper), axis=1))
+
+        tau_range = [0,8]
+        hist_bin_width = 0.1
+        hist_bin_size = int(
+            (tau_range[1] - tau_range[0]) / hist_bin_width
+        )
+        datafile = [
+            path.join(path.dirname(__file__), "data/Forests/Bosman18/data.npz")
+        ]
+        
 ###FINISHED FOREST, but not saving any of it.
 
 ###STARTING CMB
