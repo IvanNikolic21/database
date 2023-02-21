@@ -14,7 +14,7 @@ import sys
 sys.path.append('/mnt/lustre/users/inikoli/run_directory/')
 import save as save
 import logging
-
+from ps import ps1D_coeval, ps2D_coeval, ps_coeval
 import py21cmmc
 from py21cmmc import mcmc
 from py21cmmc import LikelihoodNeutralFraction
@@ -32,12 +32,12 @@ logger.setLevel(logging.INFO)
 
 #main parameter combinations:
 user_params = {
-    'HII_DIM':128,
-    'BOX_LEN':256.0,  #note the change
+    'HII_DIM':200,
+    'BOX_LEN':400.0,  #note the change
     'USE_INTERPOLATION_TABLES': True,
     'USE_FFTW_WISDOM': True,
     'PERTURB_ON_HIGH_RES': True,
-    'N_THREADS': 16,
+    'N_THREADS': 12,
     'OUTPUT_ALL_VEL': False,  #for kSZ need to save all velocity components.
     'USE_RELATIVE_VELOCITIES' : True,
     'POWER_SPECTRUM': 5,
@@ -56,7 +56,7 @@ flag_options = {
     'PHOTON_CONS': False,#for now
     'EVOLVING_R_BUBBLE_MAX': True, #This parameter is not present in master!
     'USE_TS_FLUCT': True,
-    'USE_MINI_HALOS': True,
+    #'USE_MINI_HALOS': True,
 }
 
 global_params = {
@@ -67,7 +67,7 @@ global_params = {
 }
 
 ### tau_GP function is the exact replica of 21cmmc.
-def tau_GP(self, gamma_bg, delta, temp, redshifts, cosmo_params):
+def tau_GP(gamma_bg, delta, temp, redshifts, cosmo_params):
     r"""Calculating the lyman-alpha optical depth in each pixel using the fluctuating GP approximation.
     Parameters
     ----------
@@ -201,6 +201,8 @@ while True:
        "density",
        "velocity",
        "brightness_temp",
+       "temp_kinetic_all_gas",
+       "Gamma12_box",
     )
     output_dir = '/home/inikoli/lustre/run_directory/output/'
 
@@ -220,9 +222,9 @@ while True:
         'ALPHA_STAR' : 0.5,
         't_STAR' : 0.44,
         'F_ESC10': -1.3,
-        'ALPHA_ESC' : -0.1,
-        'F_STAR7_MINI' : -2.20,
-        'F_ESC7_MINI' : -2.1,
+        'ALPHA_ESC' : -0.1 + (np.random.uniform()-0.5),
+    #    'F_STAR7_MINI' : -2.20,
+    #    'F_ESC7_MINI' : -2.1,
         'L_X' : 41.0,
         'NU_X_THRESH' : 700,
     }
@@ -249,7 +251,7 @@ while True:
                 f_rescale_slope_now
             )
 
-    except AttributeError as e:
+    except (NameError,AttributeError) as e:
 
         container = save.HDF5saver(
             astro_params_now,
@@ -278,7 +280,7 @@ while True:
         **global_params,
     )
     for z, c in enumerate(coeval):
-        container.add_coevals(self.redshift[z], c)
+        container.add_coevals(coeval_zs[z], c)
     print("ended coeval, starting lightcone")
     lightcone,PS = p21c.run_lightcone(
         redshift=4.9,
@@ -319,7 +321,7 @@ while True:
         Muv, mhalo, lfunc = p21c.compute_luminosity_function(
                 mturnovers=mturnovers,
                 mturnovers_mini=mturnovers_mini,
-                redshifts=z_uv,
+                redshifts=[z_uv],
                 astro_params=astro_params_now,
                 flag_options=flag_options,
                 cosmo_params=cosmo_params_now,
@@ -371,7 +373,7 @@ while True:
             noise = noise[0]
             lnl = 0
             model_spline =  InterpolatedUnivariateSpline(
-                Muv[::-1], lfunc[::-1]
+                Muv[0][::-1], lfunc[0][::-1]
             )
             lnl += -0.5 * np.sum(
                 (
@@ -473,18 +475,18 @@ while True:
             else:
                 data.append(dict(np.load(fl, allow_pickle=True)))
         targets = np.where(
-            (data["zs"] > (z_forest - 0.1))
-            * (data["zs"] <= (z_forest + 0.1))
+            (data[0]["zs"] > (z_forest - 0.1))
+            * (data[0]["zs"] <= (z_forest + 0.1))
         )[0]
         pdfs_data = np.zeros([2, hist_bin_size])
 
         pdfs_data[0] = np.histogram(
-            data["tau_lower"][targets], range=tau_range,
+            data[0]["tau_lower"][targets], range=tau_range,
             bins=hist_bin_size
         )[0]
 
         pdfs_data[1] = np.histogram(
-            data["tau_upper"][targets], range=tau_range,
+            data[0]["tau_upper"][targets], range=tau_range,
             bins=hist_bin_size
         )[0]
         noise = []
@@ -492,7 +494,10 @@ while True:
             if not path.exists(fl):
                 raise ValueError
             else:
-                noise.append(dict(np.load(fl, allow_pickle=True)))
+                try:
+                    noise.append(dict(np.load(fl, allow_pickle=True)))
+                except ValueError:
+                    noise.append(np.load(fl, allow_pickle=True))
         ErrorCovarianceMatrix_GP = noise[0]
 
         pdfs_model = np.zeros([n_realization, hist_bin_size])
@@ -529,7 +534,7 @@ while True:
         xHI_CMB = neutral_frac_func(z_extrap)
         np.clip(xHI_CMB, 0, 1, xHI_CMB)
         tau_value = lib.compute_tau(
-            user_params=+user_params,
+            user_params=user_params,
             cosmo_params=cosmo_params_now,
             redshifts=z_extrap,
             global_xHI=xHI_CMB,
@@ -545,5 +550,6 @@ while True:
     ###END OF CMB, CLEANING EVERYTHING UP
 
     del container
-    for index_rm, file_rm in glob.glob(my_cache + '/*' + str(init_seed_now) + '.h5'):
+    container = None
+    for file_rm in glob.glob(my_cache + '/*' + str(init_seed_now) + '.h5'):
         os.system('rm '+ file_rm)
