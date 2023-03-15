@@ -37,7 +37,7 @@ user_params = {
     'USE_INTERPOLATION_TABLES': True,
     'USE_FFTW_WISDOM': True,
     'PERTURB_ON_HIGH_RES': True,
-    'N_THREADS': 12,
+    'N_THREADS': 8,
     'OUTPUT_ALL_VEL': False,  #for kSZ need to save all velocity components.
     'USE_RELATIVE_VELOCITIES' : True,
     'POWER_SPECTRUM': 5,
@@ -53,10 +53,10 @@ cosmo_params = {
 flag_options = {
     'USE_MASS_DEPENDENT_ZETA': True,
     'INHOMO_RECO': True,
-    'PHOTON_CONS': False,#for now
-    'EVOLVING_R_BUBBLE_MAX': True, #This parameter is not present in master!
+    'PHOTON_CONS': True,#for now
+    'EVOLVING_R_BUBBLE_MAX': False, #This parameter is not present in master!
     'USE_TS_FLUCT': True,
-    #'USE_MINI_HALOS': True,
+    'USE_MINI_HALOS': True,
 }
 
 global_params = {
@@ -203,37 +203,39 @@ while True:
        "brightness_temp",
        "temp_kinetic_all_gas",
        "Gamma12_box",
+       "Ts_box",
     )
-    output_dir = '/home/inikoli/lustre/run_directory/output/'
+    output_dir = '/home/inikoli/lustre/run_directory/output_w_mh/'
 
     astro_params = {
         'F_STAR10' : params_this[0],
         'ALPHA_STAR' : params_this[1],
         't_STAR' : params_this[2],
-        'F_ESC10' : params_this[3],
-        'ALPHA_ESC' : params_this[4],
+        'M_TURN' : params_this[3],
+        'F_ESC10' : params_this[4],
+        'ALPHA_ESC' : params_this[5],
         'F_STAR7_MINI' : params_this[6],
         'F_ESC7_MINI' : params_this[7],
-        'L_X' : params_this[8],
-        'NU_X_THRESH' : params_this[9],
+        'L_X' : params_this[7],
+        'NU_X_THRESH' : params_this[8],
     }
-    astro_params = {
-        'F_STAR10' : -1.30,
-        'ALPHA_STAR' : 0.5,
-        't_STAR' : 0.44,
-        'F_ESC10': -1.3,
-        'ALPHA_ESC' : -0.1 + (np.random.uniform()-0.5),
+#    astro_params = {
+#        'F_STAR10' : -1.30,
+#        'ALPHA_STAR' : 0.5,
+#        't_STAR' : 0.44,
+#        'F_ESC10': -1.3,
+#        'ALPHA_ESC' : -0.1 + (np.random.uniform()-0.5),
     #    'F_STAR7_MINI' : -2.20,
     #    'F_ESC7_MINI' : -2.1,
-        'L_X' : 41.0,
-        'NU_X_THRESH' : 700,
-    }
+#        'L_X' : 41.0,
+#        'NU_X_THRESH' : 700,
+    #}
     #cosmo_params['SIGMA_8'] = params_this[5]
     #log10_f_rescale_now = params_this[10]
     #f_rescale_slope_now = params_this[11]
     log10_f_rescale_now = 0.0
     f_rescale_slope_now = 0.0
-    cosmo_params['SIGMA_8'] = 0.8118
+    cosmo_params['SIGMA_8'] = params_this[6]
     parameter_names = list(astro_params.keys()) + ['SIGMA_8', 'log10_f_rescale', 'f_rescale_slope']
     astro_params_now = AstroParams(astro_params)
     cosmo_params_now = CosmoParams(cosmo_params)
@@ -279,12 +281,17 @@ while True:
         direc=my_cache,
         **global_params,
     )
-    for z, c in enumerate(coeval):
-        container.add_coevals(coeval_zs[z], c)
+    try:
+        for z, c in enumerate(coeval):
+            container.add_coevals(coeval_zs[z], c)
+    except ValueError:
+        print("Already sampled")
+        continue
+          
     print("ended coeval, starting lightcone")
     lightcone,PS = p21c.run_lightcone(
         redshift=4.9,
-        max_redshift=15,
+        max_redshift=25,
         user_params=user_params,
         cosmo_params=cosmo_params_now,
         astro_params=astro_params_now,

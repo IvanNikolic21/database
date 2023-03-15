@@ -150,14 +150,29 @@ class HDF5saver:
             compression='gzip',
             compression_opts=9
         )
-        #f["lightcones"].create_dataset(
-        #    "Ts_box",
-        #    dtype="float",
-        #    data = lc.Ts_box,
-        #    compression='gzip',
-        #    compression_opts=9
-        #)
-        #f.close()
+        f["lightcones"].create_dataset(
+            "Ts_box",
+            dtype="float",
+            data = lc.Ts_box,
+            compression='gzip',
+            compression_opts=9
+        )
+        f["lightcones"].create_dataset(
+            "Gamma12_box",
+            dtype="float",
+            data = lc.Gamma12_box,
+            compression='gzip',
+            compression_opts=9,
+        )
+        f.create_group("globals")
+        f["globals"].create_dataset(
+            "global_brightness_temp",
+            dtype="float",
+            data = lc.global_brightness_temp,
+            compression = 'gzip',
+            compression_opts=9,
+        )
+        f.close()
 
     def add_rstate(self, rs):
         """Add random state for the current sample."""
