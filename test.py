@@ -233,8 +233,8 @@ while True:
     #cosmo_params['SIGMA_8'] = params_this[5]
     #log10_f_rescale_now = params_this[10]
     #f_rescale_slope_now = params_this[11]
-    log10_f_rescale_now = 0.0
-    f_rescale_slope_now = 0.0
+    log10_f_rescale_now = None
+    f_rescale_slope_now = None
     cosmo_params['SIGMA_8'] = params_this[6]
     parameter_names = list(astro_params.keys()) + ['SIGMA_8', 'log10_f_rescale', 'f_rescale_slope']
     astro_params_now = AstroParams(astro_params)
@@ -442,8 +442,12 @@ while True:
                 )[0][0]
 
             tau_eff = np.zeros([n_realization, nlos])
-            f_rescale_proper = 10 ** log10_f_rescale_now
-            f_rescale_proper += (z_forest-5.7) * f_rescale_slope_now
+
+            if log10_f_rescale_now is not None:
+                f_rescale_proper = 10 ** log10_f_rescale_now
+                f_rescale_proper += (z_forest-5.7) * f_rescale_slope_now
+            else:
+                f_rescale_proper = 1.0
 
             for jj in range(n_realization):
                 gamma_bg = lightcone.Gamma12_box[:, :, index_left:index_right].reshape(
