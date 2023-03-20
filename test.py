@@ -325,6 +325,11 @@ while True:
                 np.array(lightcone.node_redshifts)[::-1], np.array(lightcone.log10_mturnovers_mini)[::-1]
             )(z_uv)
 
+        if not hasattr(mturnovers, '__len__'):
+            mturnovers = [mturnovers]
+        if not hasattr(mturnovers_mini, '__len__'):
+            mturnovers_mini = [mturnovers_mini]
+
         Muv, mhalo, lfunc = p21c.compute_luminosity_function(
                 mturnovers=mturnovers,
                 mturnovers_mini=mturnovers_mini,
@@ -379,9 +384,14 @@ while True:
             data = data[0]
             noise = noise[0]
             lnl = 0
-            model_spline =  InterpolatedUnivariateSpline(
-                Muv[0][::-1], lfunc[0][::-1]
-            )
+            try:
+                model_spline =  InterpolatedUnivariateSpline(
+                    Muv[0][::-1], lfunc[0][::-1]
+                )
+            except ValueError:    #quick hack for interpolation, don't know why it's different from 21CMMC
+                model_spline = InterpolatedUnivariateSpline(
+                    Muv[0][::1], lfunc[0][::1]
+                )
             lnl += -0.5 * np.sum(
                 (
                     (data["lfunc"] - 10 ** model_spline(data["Muv"]))
