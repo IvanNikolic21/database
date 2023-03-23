@@ -117,6 +117,12 @@ class HDF5saver:
             )
         f.close()
 
+    def add_hostname(self, name):
+        """Add a hostname to the file. Useful for debugging and seg faults"""
+        f = h5py.File(self.filename, 'a')
+        f.attrs["hostname"] = name
+        f.close()
+
     def add_lightcones(self, lc):
         """Add lightones to the h5 file."""
         f = h5py.File(self.filename, 'a')

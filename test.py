@@ -6,7 +6,7 @@ import glob
 time_start = time.time()
 #os.environ['OPENBLAS_NUM_THREADS'] = str(1)
 #os.environ['OMP_NUM_THREADS'] = str(1)
-
+import socket
 from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
 import numpy as np
 from astropy import cosmology
@@ -186,7 +186,7 @@ z_extrap_min = 5.0
 z_extrap_max = 30.0
 
 while True:
-    seed_now = np.random.randint(low=0, high=2**32-1)
+    seed_now = np.random.randint(low=0, high=2**22-1)
     np.random.seed(seed = seed_now)
     model_name = "database" + str(seed_now)
     p21c.global_params.Z_HEAT_MAX = 15.0
@@ -252,7 +252,6 @@ while True:
                 log10_f_rescale_now,
                 f_rescale_slope_now
             )
-
     except (NameError,AttributeError) as e:
 
         container = save.HDF5saver(
@@ -265,6 +264,7 @@ while True:
         )
     if not container.exists():
         container.create()
+    container.add_hostname(socket.gethostname())
 
     init_seed_now = np.random.randint(low=0, high=2**32-1)
     container.add_rstate(init_seed_now)
