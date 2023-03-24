@@ -139,7 +139,7 @@ my_cache='/home/inikoli/lustre/run_directory/_cache'    #update this to the desi
 if not os.path.exists(my_cache):
     os.mkdir(my_cache)
 
-p21c.config['direc'] = my_cache
+#p21c.config['direc'] = my_cache
 
 #######################
 model_name = "database"
@@ -268,6 +268,13 @@ while True:
 
     init_seed_now = np.random.randint(low=0, high=2**32-1)
     container.add_rstate(init_seed_now)
+
+    my_cache_now = my_cache + '/' + str(init_seed_now)
+    if not os.path.exists(my_cache_now):
+        os.mkdir(my_cache_now)
+
+    p21c.config['direc'] = my_cache_now
+
     print("starting to run coeval")
     coeval = p21c.run_coeval(
         redshift=coeval_zs,
@@ -277,8 +284,8 @@ while True:
         user_params=user_params,
         regenerate=False,
         random_seed=init_seed_now,
-        write=my_cache,
-        direc=my_cache,
+        write=my_cache_now,
+        direc=my_cache_now,
         **global_params,
     )
     try:
@@ -301,8 +308,8 @@ while True:
         lightcone_quantities=lightcone_quantities,
         random_seed=init_seed_now,
         global_quantities=lightcone_quantities,
-        write = my_cache,
-        direc = my_cache,
+        write = my_cache_now,
+        direc = my_cache_now,
         **global_params,
     )
     print("ended lightcone, starting frest")
@@ -572,5 +579,6 @@ while True:
 
     del container
     container = None
-    for file_rm in glob.glob(my_cache + '/*' + str(init_seed_now) + '.h5'):
+    for file_rm in glob.glob(my_cache_now + '/*' + str(init_seed_now) + '.h5'):
         os.system('rm '+ file_rm)
+    os.system('rmdir ' + my_cache_now)
