@@ -189,7 +189,7 @@ while True:
     seed_now = np.random.randint(low=0, high=2**22-1)
     np.random.seed(seed = seed_now)
     model_name = "database" + str(seed_now)
-#    p21c.global_params.Z_HEAT_MAX = 15.0 this is creating problems with max_redshift
+    p21c.global_params.Z_HEAT_MAX = 25.0 #this is creating problems with max_redshift
 
     params_full = np.loadtxt('/home/inikoli/params.txt')
     index_this = np.random.randint(0, np.shape(params_full)[0])
