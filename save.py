@@ -260,6 +260,17 @@ class HDF5saver:
             dtype="float",
             data = global_xH,
         )
+        f.close()
+
+    def add_lightcone_redshifts(self, lightcone_redshifts):
+        """Add lightcone redshifts to file"""
+        f = h5py.File(self.filename, 'a')
+        f.create_dataset(
+            "lightcone_redshifts",
+            dtype = "float",
+            data = lightcone_redshifts,
+        )
+        f.close()
 
     def add_UV(self, UV, z):
         """Add UVLF data for a given redshift."""

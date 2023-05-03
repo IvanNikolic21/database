@@ -37,7 +37,7 @@ user_params = {
     'USE_INTERPOLATION_TABLES': True,
     'USE_FFTW_WISDOM': True,
     'PERTURB_ON_HIGH_RES': True,
-    'N_THREADS': 8,
+    'N_THREADS': 12,
     'OUTPUT_ALL_VEL': False,  #for kSZ need to save all velocity components.
     'USE_RELATIVE_VELOCITIES' : True,
     'POWER_SPECTRUM': 5,
@@ -189,7 +189,7 @@ while True:
     seed_now = np.random.randint(low=0, high=2**22-1)
     np.random.seed(seed = seed_now)
     model_name = "database" + str(seed_now)
-    p21c.global_params.Z_HEAT_MAX = 15.0
+#    p21c.global_params.Z_HEAT_MAX = 15.0 this is creating problems with max_redshift
 
     params_full = np.loadtxt('/home/inikoli/params.txt')
     index_this = np.random.randint(0, np.shape(params_full)[0])
@@ -294,11 +294,11 @@ while True:
     except ValueError:
         print("Already sampled")
         continue
-          
+    del coeval      
     print("ended coeval, starting lightcone")
     lightcone,PS = p21c.run_lightcone(
         redshift=4.9,
-        max_redshift=25,
+        max_redshift=25, #note the change
         user_params=user_params,
         cosmo_params=cosmo_params_now,
         astro_params=astro_params_now,
@@ -308,7 +308,7 @@ while True:
         lightcone_quantities=lightcone_quantities,
         random_seed=init_seed_now,
         global_quantities=lightcone_quantities,
-        write = my_cache_now,
+      #  write = my_cache_now,
         direc = my_cache_now,
         **global_params,
     )
@@ -321,7 +321,7 @@ while True:
             lightcone.global_xH
         )
         container.add_lightcones(lightcone)
-
+        container.add_lightcone_redshifts(lightcone.lightcone_redshifts)
 ####LF part
 
     for index_uv, z_uv in enumerate(lf_zs_saved):
@@ -577,7 +577,7 @@ while True:
 
     ###END OF CMB, CLEANING EVERYTHING UP
 
-    del container
+    del container, lightcone
     container = None
     for file_rm in glob.glob(my_cache_now + '/*' + str(init_seed_now) + '.h5'):
         os.system('rm '+ file_rm)
