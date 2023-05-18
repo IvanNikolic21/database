@@ -206,7 +206,7 @@ while True:
        "Ts_box",
     )
     output_dir = '/home/inikoli/lustre/run_directory/output_w_mh/'
-    global_quantities = list(lightcone_quantities) + "dNrec_box"
+    global_quantities = list(lightcone_quantities) + ["dNrec_box", "MFP_box"]
     astro_params = {
         'F_STAR10' : params_this[0],
         'ALPHA_STAR' : params_this[1],
@@ -480,6 +480,18 @@ while True:
 
                 tau_eff[jj] = -np.log(
                     np.mean(np.exp(-tau_lyman_alpha * f_rescale_proper), axis=1))
+
+            tau_Lyman_alpha_lc = tau_GP(
+                lightcone.Gamma12_box,
+                lightcone.density,
+                lightcone.temp_kinetic_all_gas,
+                lightcone_redshifts,
+                cosmo_params_now
+            )
+
+            container.add_tau_lc(
+                tau_Lyman_alpha_lc
+            )
 
         tau_range = [0,8]
         hist_bin_width = 0.1

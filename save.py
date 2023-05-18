@@ -181,6 +181,13 @@ class HDF5saver:
             dtype = "float",
             data = lc.global_dNrec, 
         )
+
+        f["globals"].create_dataset(
+            "global_MFP",
+            dtype="float",
+            data=lc.global_MFP
+        )
+
         f.close()
 
     def add_rstate(self, rs):
@@ -309,6 +316,24 @@ class HDF5saver:
             data = tau_value
         )
         f.close()
+
+    def add_tau_lc(self, tau_Lyman_alpha_lc):
+        """add tau lightcone"""
+        f = h5py.File(self.filename, 'a')
+        try:
+            f["lightcones"].create_dataset(
+                "tau_Lyman_alpha_lc",
+                dtype="float",
+                data=tau_Lyman_alpha_lc,
+                compression='gzip',
+                compression_opts=9
+            )
+            f.close()
+        except ValueError:
+            print("Some problem with accessing the group")
+            f.close()
+            return 0
+
     def add_tau_likelihood(self, tau_likelihood):
         """Likelihood for optical depth"""
         f = h5py.File(self.filename, 'a')
