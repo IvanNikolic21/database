@@ -218,6 +218,7 @@ while True:
         'F_ESC7_MINI' : params_this[8],
         'L_X' : params_this[9],
         'NU_X_THRESH' : params_this[10],
+        'L_X_MINI' : params_this[11],
     }
 #    astro_params = {
 #        'F_STAR10' : -1.30,

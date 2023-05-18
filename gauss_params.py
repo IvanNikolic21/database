@@ -11,8 +11,9 @@ param_dict = {
     'SIGMA_8' : [0.8118, 0.75, 0.85, 0.01], #Gaussian initiall ball here corresponds to Planck 68% CI
     'F_STAR7' : [-2.75, -4.0, -1.0, 1.0],
     'F_ESC7' : [-1.2, -3.0, -1.0, 1.0], #Based on YQ+20
-    'L_X' : [40.5, 38.0, 42.0, 1.0],
+    'L_X' : [40.5, 38.0, 43.0, 1.0],
     'NU_X_THRESH' : [500, 100, 1500, 300],
+    'L_X_MINI' : [41.5, 38.0, 44.0, 1.5],
 #    'log10_f_rescale' : [0.0, -5.0, 5.0, 1.5],
 #    'f_rescale_slope' : [0.0, -2.5, 2.5, 2.0],
 }
@@ -29,6 +30,7 @@ param_dict_names_listed = [
     'F_ESC7',
     'L_X',
     'NU_X_THRESH',
+    'L_X_MINI'
 #    'log10_f_rescale',
 #    'f_rescale_slope']
 ] 
