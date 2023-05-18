@@ -206,7 +206,7 @@ while True:
        "Ts_box",
     )
     output_dir = '/home/inikoli/lustre/run_directory/output_w_mh/'
-
+    global_quantities = list(lightcone_quantities) + "dNrec_box"
     astro_params = {
         'F_STAR10' : params_this[0],
         'ALPHA_STAR' : params_this[1],
@@ -307,7 +307,7 @@ while True:
         coeval_callback=lambda x: ps_coeval(x, 50),
         lightcone_quantities=lightcone_quantities,
         random_seed=init_seed_now,
-        global_quantities=lightcone_quantities,
+        global_quantities=global_quantities,
       #  write = my_cache_now,
         direc = my_cache_now,
         **global_params,

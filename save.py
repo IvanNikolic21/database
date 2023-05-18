@@ -175,8 +175,11 @@ class HDF5saver:
             "global_brightness_temp",
             dtype="float",
             data = lc.global_brightness_temp,
-            compression = 'gzip',
-            compression_opts=9,
+        )
+        f["globals"].create_dataset(
+            "global_dNrec",
+            dtype = "float",
+            data = lc.global_dNrec, 
         )
         f.close()
 
