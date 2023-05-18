@@ -60,7 +60,7 @@ flag_options = {
 }
 
 global_params = {
-    'Z_HEAT_MAX': 15.0, 
+#    'Z_HEAT_MAX': 15.0, 
     'T_RE': 2e4,
     'ALPHA_UVB': 2.0,
     'PhotonConsEndCalibz':3.5
