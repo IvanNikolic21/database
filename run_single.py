@@ -205,7 +205,7 @@ while True:
        "Gamma12_box",
        "Ts_box",
     )
-    output_dir = '/home/inikoli/lustre/run_directory/output_w_mh/'
+    output_dir = '/home/inikoli/lustre/run_directory/production_database/'
     global_quantities = list(lightcone_quantities) + ["dNrec_box", "MFP_box"]
     astro_params = {
         'F_STAR10' : params_this[0],
