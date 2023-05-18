@@ -189,7 +189,7 @@ while True:
     seed_now = np.random.randint(low=0, high=2**22-1)
     np.random.seed(seed = seed_now)
     model_name = "database" + str(seed_now)
-    p21c.global_params.Z_HEAT_MAX = 25.0 #this is creating problems with max_redshift
+    p21c.global_params.Z_HEAT_MAX = 35.0 #this is creating problems with max_redshift
 
     params_full = np.loadtxt('/home/inikoli/params.txt')
     index_this = np.random.randint(0, np.shape(params_full)[0])
@@ -299,7 +299,7 @@ while True:
     print("ended coeval, starting lightcone")
     lightcone,PS = p21c.run_lightcone(
         redshift=4.9,
-        max_redshift=25, #note the change
+        max_redshift=35, #note the change
         user_params=user_params,
         cosmo_params=cosmo_params_now,
         astro_params=astro_params_now,
