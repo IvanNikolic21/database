@@ -35,6 +35,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--output_dir", type=str, default='/home/inikoli/lustre/run_directory/production_database/')
 parser.add_argument("--cache_dir", type=str, default='/home/inikoli/lustre/run_directory/_cache/')
 parser.add_argument("--threads", type=int, default=12)
+parser.add_argument("--params_dir", type=str, default='/home/inikoli/')
 inputs = parser.parse_args()
 
 #main parameter combinations:
@@ -198,7 +199,7 @@ while True:
     model_name = "database" + str(seed_now)
     p21c.global_params.Z_HEAT_MAX = 35.0 #this is creating problems with max_redshift
 
-    params_full = np.loadtxt('/home/inikoli/params.txt')
+    params_full = np.loadtxt(inputs.params_dir + 'params.txt')
     index_this = np.random.randint(0, np.shape(params_full)[0])
     params_this = params_full[index_this]
 

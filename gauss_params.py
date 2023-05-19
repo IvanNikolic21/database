@@ -1,6 +1,11 @@
 import scipy.stats as stats
 import numpy as np
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--output_dir", type=str, default='/home/inikoli/')
+inputs = parser.parse_args()
+
 param_dict = {
     'F_STAR10' : [-1.3, -2, -0.5, 0.2],
     'ALPHA_STAR' : [0.5, 0.0, 1.0, 0.2],
@@ -66,7 +71,7 @@ comb_now = np.asarray(
 
 
 
-folder_to_add = r'/home/inikoli/'
+folder_to_add = inputs.output_dir
 #    with open(folder_to_add + 'params.txt', 'a') as f:
 #        f.write(str(comb_now)
 np.savetxt(folder_to_add + 'params.txt', comb_now)
