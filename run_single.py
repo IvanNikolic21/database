@@ -34,6 +34,7 @@ logger.setLevel(logging.INFO)
 parser = argparse.ArgumentParser()
 parser.add_argument("--output_dir", type=str, default='/home/inikoli/lustre/run_directory/production_database/')
 parser.add_argument("--cache_dir", type=str, default='/home/inikoli/lustre/run_directory/_cache/')
+parser.add_argument("--threads", type=int, default=12)
 inputs = parser.parse_args()
 
 #main parameter combinations:
@@ -43,7 +44,7 @@ user_params = {
     'USE_INTERPOLATION_TABLES': True,
     'USE_FFTW_WISDOM': True,
     'PERTURB_ON_HIGH_RES': True,
-    'N_THREADS': 12,
+    'N_THREADS': inputs.threads,
     'OUTPUT_ALL_VEL': False,  #for kSZ need to save all velocity components.
     'USE_RELATIVE_VELOCITIES' : True,
     'POWER_SPECTRUM': 5,
