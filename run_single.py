@@ -16,6 +16,7 @@ import save as save
 import logging
 from ps import ps1D_coeval, ps2D_coeval, ps_coeval
 import py21cmmc
+import argparse
 from py21cmmc import mcmc
 from py21cmmc import LikelihoodNeutralFraction
 from py21cmmc import CoreLightConeModule
@@ -29,6 +30,11 @@ from py21cmfast import AstroParams, CosmoParams
 
 logger = logging.getLogger('21cmFAST')
 logger.setLevel(logging.INFO)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--output_dir", type=str, default='/home/inikoli/lustre/run_directory/production_database/')
+parser.add_argument("--cache_dir", type=str, default='/home/inikoli/lustre/run_directory/_cache/')
+inputs = parser.parse_args()
 
 #main parameter combinations:
 user_params = {
@@ -135,7 +141,7 @@ def tau_GP(gamma_bg, delta, temp, redshifts, cosmo_params):
 import py21cmfast as p21c
 from py21cmfast import wrapper as lib
 
-my_cache='/home/inikoli/lustre/run_directory/_cache'    #update this to the desired _cache directory.
+my_cache=inputs.cache_dir    #update this to the desired _cache directory.
 if not os.path.exists(my_cache):
     os.mkdir(my_cache)
 
@@ -205,7 +211,7 @@ while True:
        "Gamma12_box",
        "Ts_box",
     )
-    output_dir = '/home/inikoli/lustre/run_directory/production_database/'
+    output_dir = inputs.output_dir
     global_quantities = list(lightcone_quantities) + ["dNrec_box", "MFP_box"]
     astro_params = {
         'F_STAR10' : params_this[0],
