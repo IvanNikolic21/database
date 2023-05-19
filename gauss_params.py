@@ -3,7 +3,7 @@ import numpy as np
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("--output_dir", type=str, default='/home/inikoli/')
+parser.add_argument("--params_dir", type=str, default='/home/inikoli/')
 inputs = parser.parse_args()
 
 param_dict = {
@@ -71,7 +71,7 @@ comb_now = np.asarray(
 
 
 
-folder_to_add = inputs.output_dir
+folder_to_add = inputs.params_dir
 #    with open(folder_to_add + 'params.txt', 'a') as f:
 #        f.write(str(comb_now)
 np.savetxt(folder_to_add + 'params.txt', comb_now)
