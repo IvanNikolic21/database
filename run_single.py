@@ -312,7 +312,7 @@ while True:
         cosmo_params=cosmo_params_now,
         astro_params=astro_params_now,
         flag_options=flag_options,
-        rotation_cubes=False,
+        #rotation_cubes=False,
         coeval_callback=lambda x: ps_coeval(x, 50),
         lightcone_quantities=lightcone_quantities,
         random_seed=init_seed_now,
