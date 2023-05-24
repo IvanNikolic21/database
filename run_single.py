@@ -219,14 +219,14 @@ while True:
         'F_STAR10' : params_this[0],
         'ALPHA_STAR' : params_this[1],
         't_STAR' : params_this[2],
-        'M_TURN' : params_this[3],
-        'F_ESC10' : params_this[4],
-        'ALPHA_ESC' : params_this[5],
-        'F_STAR7_MINI' : params_this[7],
-        'F_ESC7_MINI' : params_this[8],
-        'L_X' : params_this[9],
-        'NU_X_THRESH' : params_this[10],
-        'L_X_MINI' : params_this[11],
+       # 'M_TURN' : params_this[3],
+        'F_ESC10' : params_this[3],
+        'ALPHA_ESC' : params_this[4],
+        'F_STAR7_MINI' : params_this[6],
+        'F_ESC7_MINI' : params_this[7],
+        'L_X' : params_this[8],
+        'NU_X_THRESH' : params_this[9],
+        'L_X_MINI' : params_this[10],
     }
 #    astro_params = {
 #        'F_STAR10' : -1.30,
@@ -244,7 +244,7 @@ while True:
     #f_rescale_slope_now = params_this[11]
     log10_f_rescale_now = None
     f_rescale_slope_now = None
-    cosmo_params['SIGMA_8'] = params_this[6]
+    cosmo_params['SIGMA_8'] = params_this[5]
     parameter_names = list(astro_params.keys()) + ['SIGMA_8', 'log10_f_rescale', 'f_rescale_slope']
     astro_params_now = AstroParams(astro_params)
     cosmo_params_now = CosmoParams(cosmo_params)
