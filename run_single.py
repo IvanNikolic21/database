@@ -26,6 +26,7 @@ from py21cmmc import LikelihoodPlanck
 from py21cmmc import LikelihoodBase
 from py21cmmc import CoreCoevalModule
 from py21cmfast import AstroParams, CosmoParams
+from py21cmfast._utils import InfinityorNaNError
 #set logger from 21cmFAST
 
 logger = logging.getLogger('21cmFAST')
@@ -284,19 +285,23 @@ while True:
 
     p21c.config['direc'] = my_cache_now
 
-    print("starting to run coeval")
-    coeval = p21c.run_coeval(
-        redshift=coeval_zs,
-        astro_params=astro_params_now,
-        cosmo_params=cosmo_params_now,
-        flag_options=flag_options,
-        user_params=user_params,
-        regenerate=False,
-        random_seed=init_seed_now,
-        write=my_cache_now,
-        direc=my_cache_now,
-        **global_params,
-    )
+    print("starting to run coeval for this params", astro_params_now)
+    try:
+        coeval = p21c.run_coeval(
+            redshift=coeval_zs,
+            astro_params=astro_params_now,
+            cosmo_params=cosmo_params_now,
+            flag_options=flag_options,
+            user_params=user_params,
+            regenerate=False,
+            random_seed=init_seed_now,
+            write=my_cache_now,
+            direc=my_cache_now,
+            **global_params,
+        )
+    except InfinityorNaNError:
+        print("coevals failed with these params", astro_params_now)
+        continue
     try:
         for z, c in enumerate(coeval):
             container.add_coevals(coeval_zs[z], c)
@@ -304,23 +309,27 @@ while True:
         print("Already sampled")
         continue
     del coeval      
-    print("ended coeval, starting lightcone")
-    lightcone,PS = p21c.run_lightcone(
-        redshift=4.9,
-        max_redshift=35, #note the change
-        user_params=user_params,
-        cosmo_params=cosmo_params_now,
-        astro_params=astro_params_now,
-        flag_options=flag_options,
-        #rotation_cubes=False,
-        coeval_callback=lambda x: ps_coeval(x, 50),
-        lightcone_quantities=lightcone_quantities,
-        random_seed=init_seed_now,
-        global_quantities=global_quantities,
-      #  write = my_cache_now,
-        direc = my_cache_now,
-        **global_params,
-    )
+    print("ended coeval, starting lightcone with these astros", astro_params_now)
+    try:
+        lightcone,PS = p21c.run_lightcone(
+            redshift=4.9,
+            max_redshift=35, #note the change
+            user_params=user_params,
+            cosmo_params=cosmo_params_now,
+            astro_params=astro_params_now,
+            flag_options=flag_options,
+            #rotation_cubes=False,
+            coeval_callback=lambda x: ps_coeval(x, 50),
+            lightcone_quantities=lightcone_quantities,
+            random_seed=init_seed_now,
+            global_quantities=global_quantities,
+        #  write = my_cache_now,
+            direc = my_cache_now,
+            **global_params,
+        )
+    except InfinityorNaNError:
+        print("There was some error with photon-conservation", astro_params_now)
+        continue
     print("ended lightcone, starting frest")
     if lightcone is not None:
         container.add_PS(
