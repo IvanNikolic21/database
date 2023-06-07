@@ -609,6 +609,6 @@ while True:
 
     del container, lightcone
     container = None
-    for file_rm in glob.glob(my_cache_now + '/*' + str(init_seed_now) + '.h5'):
-        os.system('rm '+ file_rm)
-    os.system('rmdir ' + my_cache_now)
+    #for file_rm in glob.glob(my_cache_now + '/*' + str(init_seed_now) + '.h5'):
+    #    os.system('rm '+ file_rm)
+    #os.system('rmdir ' + my_cache_now)
