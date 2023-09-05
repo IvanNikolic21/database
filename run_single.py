@@ -62,7 +62,7 @@ cosmo_params = {
 flag_options = {
     'USE_MASS_DEPENDENT_ZETA': True,
     'INHOMO_RECO': True,
-    'PHOTON_CONS': True,#for now
+    'PHOTON_CONS': False,#for now
     'EVOLVING_R_BUBBLE_MAX': False, #This parameter is not present in master!
     'USE_TS_FLUCT': True,
     'USE_MINI_HALOS': True,
@@ -323,7 +323,7 @@ while True:
             lightcone_quantities=lightcone_quantities,
             random_seed=init_seed_now,
             global_quantities=global_quantities,
-        #  write = my_cache_now,
+            write = False,
             direc = my_cache_now,
             **global_params,
         )
@@ -609,6 +609,6 @@ while True:
 
     del container, lightcone
     container = None
-    #for file_rm in glob.glob(my_cache_now + '/*' + str(init_seed_now) + '.h5'):
-    #    os.system('rm '+ file_rm)
-    #os.system('rmdir ' + my_cache_now)
+    for file_rm in glob.glob(my_cache_now + '/*' + str(init_seed_now) + '.h5'):
+        os.system('rm '+ file_rm)
+    os.system('rmdir ' + my_cache_now)
