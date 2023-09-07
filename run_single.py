@@ -285,31 +285,31 @@ while True:
 
     p21c.config['direc'] = my_cache_now
 
-    print("starting to run coeval for this params", astro_params_now)
-    try:
-        coeval = p21c.run_coeval(
-            redshift=coeval_zs,
-            astro_params=astro_params_now,
-            cosmo_params=cosmo_params_now,
-            flag_options=flag_options,
-            user_params=user_params,
-            regenerate=False,
-            random_seed=init_seed_now,
-            write=my_cache_now,
-            direc=my_cache_now,
-            **global_params,
-        )
-    except InfinityorNaNError:
-        print("coevals failed with these params", astro_params_now)
-        continue
-    try:
-        for z, c in enumerate(coeval):
-            container.add_coevals(coeval_zs[z], c)
-    except ValueError:
-        print("Already sampled")
-        continue
-    del coeval      
-    print("ended coeval, starting lightcone with these astros", astro_params_now)
+    #print("starting to run coeval for this params", astro_params_now)
+    #try:
+    #    coeval = p21c.run_coeval(
+    #        redshift=coeval_zs,
+    #        astro_params=astro_params_now,
+    #        cosmo_params=cosmo_params_now,
+    #        flag_options=flag_options,
+    #        user_params=user_params,
+    #        regenerate=False,
+    #        random_seed=init_seed_now,
+    #        write=my_cache_now,
+    #        direc=my_cache_now,
+    #        **global_params,
+    #    )
+    #except InfinityorNaNError:
+    #    print("coevals failed with these params", astro_params_now)
+    #    continue
+    #try:
+    #    for z, c in enumerate(coeval):
+    #        container.add_coevals(coeval_zs[z], c)
+    #except ValueError:
+    #    print("Already sampled")
+    #    continue
+    #del coeval      
+    #print("ended coeval, starting lightcone with these astros", astro_params_now)
     try:
         lightcone,PS = p21c.run_lightcone(
             redshift=4.9,
@@ -331,6 +331,26 @@ while True:
         print("There was some error with photon-conservation", astro_params_now)
         continue
     print("ended lightcone, starting frest")
+    actual_coeval_zs = np.array(
+            [
+                4.999897180070854,
+                6.000744510116025,
+                7.0012865452142465,
+                8.000931004156865,
+                8.996007588515452,
+                9.996775809865468
+                ]
+    )
+    actual_coeval_z_inds = np.array(
+            [
+                27,
+                265,
+                457,
+                616,
+                750,
+                866
+                ]
+            )
     if lightcone is not None:
         container.add_PS(
             PS, lightcone.node_redshifts  # post-processing is done in save.py
@@ -340,6 +360,11 @@ while True:
         )
         container.add_lightcones(lightcone)
         container.add_lightcone_redshifts(lightcone.lightcone_redshifts)
+        for z_ind in actual_coeval_z_inds:
+            #first check redshift
+            if not np.isclose(PS[z_ind][2].redshift, actual_coeval_zs[z_ind]):
+                raise ValueError("There was some error with redshifts, check the ordering.")
+            container.add_coevals(actual_coeval_zs[z], PS[z_ind][2])
 ####LF part
 
     for index_uv, z_uv in enumerate(lf_zs_saved):
@@ -607,7 +632,7 @@ while True:
 
     ###END OF CMB, CLEANING EVERYTHING UP
 
-    del container, lightcone
+    del container, lightcone, PS
     container = None
     for file_rm in glob.glob(my_cache_now + '/*' + str(init_seed_now) + '.h5'):
         os.system('rm '+ file_rm)
