@@ -333,25 +333,27 @@ while True:
     print("ended lightcone, starting frest")
     actual_coeval_zs = np.array(
             [
-                4.999897180070854,
-                6.000744510116025,
-                7.0012865452142465,
-                8.000931004156865,
-                8.996007588515452,
-                9.996775809865468
+                9.900767694127234,
+                9.070625127659492,
+                7.942427917400142,
+                6.940620968827835,
+                6.051044968212614,
+                5.017999887466431
                 ]
     )
     actual_coeval_z_inds = np.array(
             [
-                27,
-                265,
-                457,
-                616,
-                750,
-                866
+                61,
+                65,
+                71,
+                77,
+                83,
+                91
                 ]
             )
     if lightcone is not None:
+        for index_ps, ps_i in enumerate(PS):
+            print(index_ps, len(ps_i))
         container.add_PS(
             PS, lightcone.node_redshifts  # post-processing is done in save.py
         )
@@ -360,11 +362,15 @@ while True:
         )
         container.add_lightcones(lightcone)
         container.add_lightcone_redshifts(lightcone.lightcone_redshifts)
-        for z_ind in actual_coeval_z_inds:
+        for ind_ind,z_ind in enumerate(actual_coeval_z_inds):
             #first check redshift
-            if not np.isclose(PS[z_ind][2].redshift, actual_coeval_zs[z_ind]):
+            try:
+                np.isclose(PS[z_ind][2].redshift, actual_coeval_zs[ind_ind])
+            except ValueError:
+                print(PS[z_ind], "This is the PS")
+                print(actual_coeval_zs[ind_ind])
                 raise ValueError("There was some error with redshifts, check the ordering.")
-            container.add_coevals(actual_coeval_zs[z], PS[z_ind][2])
+            container.add_coevals(actual_coeval_zs[ind_ind], PS[z_ind][2])
 ####LF part
 
     for index_uv, z_uv in enumerate(lf_zs_saved):
