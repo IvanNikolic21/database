@@ -323,7 +323,7 @@ while True:
             lightcone_quantities=lightcone_quantities,
             random_seed=init_seed_now,
             global_quantities=global_quantities,
-            write = False,
+            #write = False,
             direc = my_cache_now,
             **global_params,
         )
