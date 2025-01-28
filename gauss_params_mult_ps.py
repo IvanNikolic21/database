@@ -11,8 +11,8 @@ param_dict = {
     'ALPHA_STAR' : [0.5, 0.0, 1.0, 0.15],
     't_STAR' : [0.55, 0.01, 1.0, 0.3],        #removed M_turn as it's already calculated.
     #'M_TURN' : [8.7, 8.0, 10.0, 0.4],
-    'F_ESC10' : [-1.3, -3.0, 0.0, 0.4],
-    'ALPHA_ESC' : [0.0, -1.0, 1.0, 0.5],
+    'F_ESC10' : [-1.3, -3.0, 0.0, 0.5],
+    'ALPHA_ESC' : [0.0, -1.0, 1.0, 0.6],
     'SIGMA_8' : [0.8118, 0.75, 0.85, 0.01], #Gaussian initiall ball here corresponds to Planck 68% CI
     'F_STAR7' : [-2.5, -4.0, -1.0, 0.8],
     'F_ESC7' : [-1.5, -3.0, -1.0, 0.8], #Based on YQ+20
