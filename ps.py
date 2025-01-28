@@ -981,7 +981,21 @@ def ps_coeval(
                     otherwise, returns `{"power": array, "var_power": array}`.
                     Moreover, if `compute_variance is False`, only "delta" or "power" array is returned.
                 k : see above functions for detailed explanation. 1D and 2D have different k definition.
-    +    """
+        """
+    coeval_zs = np.array(
+            [
+                9.900767694127234,
+                9.070625127659492,
+                7.942427917400142,
+                6.940620968827835,
+                6.051044968212614,
+                5.017999887466431
+                ]
+            )
+    if any(np.isclose(coeval.redshift, coeval_zs)):
+        save_it = True
+    else:
+        save_it = False
 
     PS_2D, k_values_perp, k_values_par = ps2D_coeval(
         coeval,
@@ -1007,5 +1021,7 @@ def ps_coeval(
         obs_nanmask,
         wedge_nanmask,
     )
-
-    return ([PS_1D, k_values_1D], [PS_2D, k_values_perp, k_values_par])
+    if save_it:
+        return ([PS_1D, k_values_1D], [PS_2D, k_values_perp, k_values_par], coeval)
+    else:
+        return ([PS_1D, k_values_1D], [PS_2D, k_values_perp, k_values_par])
