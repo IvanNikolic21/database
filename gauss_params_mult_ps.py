@@ -7,15 +7,15 @@ parser.add_argument("--params_dir", type=str, default='/home/inikoli/')
 inputs = parser.parse_args()
 
 param_dict = {
-    'F_STAR10' : [-1.3, -2, -0.5, 0.2],
-    'ALPHA_STAR' : [0.5, 0.0, 1.0, 0.2],
-    't_STAR' : [0.5, 0.01, 1.0, 0.3],        #removed M_turn as it's already calculated.
+    'F_STAR10' : [-1.2, -2, -0.5, 0.2],
+    'ALPHA_STAR' : [0.5, 0.0, 1.0, 0.15],
+    't_STAR' : [0.55, 0.01, 1.0, 0.3],        #removed M_turn as it's already calculated.
     #'M_TURN' : [8.7, 8.0, 10.0, 0.4],
-    'F_ESC10' : [-1.3, -3.0, 0.0, 0.5],
-    'ALPHA_ESC' : [0.0, -1.0, 1.0, 0.6],
+    'F_ESC10' : [-1.3, -3.0, 0.0, 0.4],
+    'ALPHA_ESC' : [0.0, -1.0, 1.0, 0.5],
     'SIGMA_8' : [0.8118, 0.75, 0.85, 0.01], #Gaussian initiall ball here corresponds to Planck 68% CI
-    'F_STAR7' : [-2.75, -4.0, -1.0, 1.0],
-    'F_ESC7' : [-1.2, -3.0, -1.0, 1.0], #Based on YQ+20
+    'F_STAR7' : [-2.5, -4.0, -1.0, 0.8],
+    'F_ESC7' : [-1.5, -3.0, -1.0, 0.8], #Based on YQ+20
     'L_X' : [40.5, 38.0, 43.0, 1.0],
     'NU_X_THRESH' : [500, 100, 1500, 300],
     'L_X_MINI' : [41.5, 39.0, 44.0, 1.0],
