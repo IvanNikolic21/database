@@ -199,65 +199,74 @@ class HDF5saver:
     def add_PS(self, PS, node_redshifts):
         """Add PS for each node_redshift"""
         f = h5py.File(self.filename, 'a')
-        f.create_group("power_spectra")
+        print("Trying to save power spectra", f.keys())
+        try:
+            f.create_group("power_spectra")
 
-        #PS are packed in a mix of lists, tuples and array of shape \sim
-        # (redshifts, type, [PS, k]) way so we need to unpack it
-        #Since k are z-independent, only one instance per type is enough
-        PS_1D = np.zeros((len(node_redshifts), np.shape(PS[0][0][0][0])[0]))
-        PS_2D = np.zeros((
-            len(node_redshifts),
-            np.shape(PS[0][1][0][0])[0],
-            np.shape(PS[0][1][0][0])[1],
-        ))
+            #PS are packed in a mix of lists, tuples and array of shape \sim
+            # (redshifts, type, [PS, k]) way so we need to unpack it
+            #Since k are z-independent, only one instance per type is enough
+            PS_1D = np.zeros((len(node_redshifts), np.shape(PS[0][0][0][0])[0]))
+            PS_2D = np.zeros((
+                len(node_redshifts),
+                np.shape(PS[0][1][0][0])[0],
+                np.shape(PS[0][1][0][0])[1],
+            ))
 
-        k_1D = PS[0][0][1]
-        k_perp = PS[0][1][1]
-        k_par = PS[0][1][2]
+            k_1D = PS[0][0][1]
+            k_perp = PS[0][1][1]
+            k_par = PS[0][1][2]
 
-        for index, z in enumerate(node_redshifts):
-            PS_1D[index] = PS[index][0][0]
-            PS_2D[index] = PS[index][1][0]
+            for index, z in enumerate(node_redshifts):
+                PS_1D[index] = PS[index][0][0]
+                PS_2D[index] = PS[index][1][0]
 
-        f["power_spectra"].create_dataset(
-            "PS_1D",
-            dtype="float",
-            data = PS_1D,
-        )
+            f["power_spectra"].create_dataset(
+                "PS_1D",
+                dtype="float",
+                data = PS_1D,
+            )
 
-        f["power_spectra"].create_dataset(
-            "PS_2D",
-            dtype="float",
-            data = PS_2D
-        )
+            f["power_spectra"].create_dataset(
+                "PS_2D",
+                dtype="float",
+                data = PS_2D
+            )
 
-        f["power_spectra"].create_dataset(
-            "k_1D",
-            dtype="float",
-            data = k_1D
-        )
+            f["power_spectra"].create_dataset(
+                "k_1D",
+                dtype="float",
+                data = k_1D
+            )
 
-        f["power_spectra"].create_dataset(
-            "k_perp",
-            dtype="float",
-            data = k_perp
-        )
+            f["power_spectra"].create_dataset(
+                "k_perp",
+                dtype="float",
+                data = k_perp
+            )
 
-        f["power_spectra"].create_dataset(
-            "k_par",
-            dtype="float",
-            data = k_par,
-        )
+            f["power_spectra"].create_dataset(
+                "k_par",
+                dtype="float",
+                data = k_par,
+            )
 
         #Since I'm also passing node_redshifts, might as well also save it here.
-        f.create_group("node_redshifts")
-        f["node_redshifts"].create_dataset(
-            "node_redshifts",
-            dtype="float",
-            data = node_redshifts,
-        )
+            f.create_group("node_redshifts")
+            f["node_redshifts"].create_dataset(
+                "node_redshifts",
+                dtype="float",
+                data = node_redshifts,
+            )
 
-        f.close()
+            f.close()
+        except ValueError:
+            print("Some problem with accessing the group")
+            print("Trying to save power spectra", f.keys())
+            print("What's inside power spectrs", f['power_spectra'].keys())
+            f.close()
+            return 0
+
 
     def add_global_xH(self, global_xH):
         """Add global_xH to the file.

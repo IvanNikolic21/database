@@ -639,7 +639,7 @@ while True:
         container.add_tau_likelihood(tau_e_likelihood)
 
     ###END OF CMB, CLEANING EVERYTHING UP
-
+    print("Everything done for",container.filename)
     del container, lightcone, PS
     container = None
     for file_rm in glob.glob(my_cache_now + '/*' + str(init_seed_now) + '.h5'):
