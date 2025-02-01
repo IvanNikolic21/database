@@ -251,6 +251,7 @@ while True:
     parameter_names = list(astro_params.keys()) + ['SIGMA_8', 'log10_f_rescale', 'f_rescale_slope']
     astro_params_now = AstroParams(astro_params)
     cosmo_params_now = CosmoParams(cosmo_params)
+    init_seed_now = np.random.randint(low=0, high=2 ** 32 - 1)
     try:
         
         if not container.check_params(astro_params,
@@ -262,7 +263,8 @@ while True:
                 parameter_names,
                 output_dir,
                 log10_f_rescale_now,
-                f_rescale_slope_now
+                f_rescale_slope_now,
+                same_params=init_seed_now,
             )
     except (NameError,AttributeError) as e:
 
@@ -272,18 +274,19 @@ while True:
             parameter_names,
             output_dir,
             log10_f_rescale_now,
-            f_rescale_slope_now
+            f_rescale_slope_now,
+            same_params=init_seed_now
         )
     if not container.exists():
         container.create()
     container.add_hostname(socket.gethostname())
 
-    init_seed_now = np.random.randint(low=0, high=2**32-1)
-    container.add_rstate(init_seed_now)
+
 
     my_cache_now = my_cache + '/' + str(init_seed_now)
     if not os.path.exists(my_cache_now):
         os.mkdir(my_cache_now)
+    container.add_rstate(init_seed_now)
 
     p21c.config['direc'] = my_cache_now
 

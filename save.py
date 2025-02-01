@@ -15,7 +15,7 @@ class FilenameExistsError(AttributeError):
 
 
 class HDF5saver:
-    def get_filename(self):
+    def get_filename(self, same_params=False):
         """Set the filename for the current instance."""
         #First create a dictionary of parameters that are changing
         dict_name = {}
@@ -28,11 +28,13 @@ class HDF5saver:
                 dict_name["log10_f_rescale"] = self.log10_f_rescale
             elif p == "f_rescale_slope":
                 dict_name["f_erscale_slope"] = self.f_rescale_slope
-                
+
 
         prefix = md5(str(dict_name).replace("\n", "").encode()).hexdigest()
-
-        return self.folder + prefix + r'.h5py'
+        if same_params:
+            return self.folder + prefix + str(same_params) + r'.h5py'
+        else:
+            return self.folder + prefix + r'.h5py'
 
     def __init__(
             self,
@@ -42,6 +44,7 @@ class HDF5saver:
             folder = r'./', 
             log10_f_rescale = None, 
             f_rescale_slope = None,
+            same_params = False,
     ):
         self.folder = folder
         if param_names is not None:
@@ -52,7 +55,7 @@ class HDF5saver:
         self.log10_f_rescale = log10_f_rescale
         self.f_rescale_slope = f_rescale_slope
 
-        self.filename = self.get_filename()
+        self.filename = self.get_filename(same_params=same_params)
         #print(astro_params, cosmo_params, param_names, folder, log10_f_rescale, f_rescale_slope) 
 
     def create(self):
