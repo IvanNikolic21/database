@@ -214,7 +214,7 @@ while True:
        "Gamma12_box",
        "Ts_box",
     )
-    output_dir = inputs.output_dir + '/F_STAR10_' + str(params_this[0]) + '/'
+    output_dir = inputs.output_dir + '/F_STAR10_' + str(-1.2) + '/'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     global_quantities = list(lightcone_quantities) + ["dNrec_box", "MFP_box"]
