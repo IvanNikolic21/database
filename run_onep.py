@@ -219,17 +219,17 @@ while True:
         os.makedirs(output_dir)
     global_quantities = list(lightcone_quantities) + ["dNrec_box", "MFP_box"]
     astro_params = {
-        'F_STAR10' : -1.2,
-        'ALPHA_STAR' : 0.5,
-        't_STAR' : 0.55,
+        'F_STAR10' : -1.049498009664817877e+00,
+        'ALPHA_STAR' : 2.747411259760879076e-01,
+        't_STAR' : 1.920294315320660306e-01,
        # 'M_TURN' : params_this[3],
-        'F_ESC10' : -1.3,
-        'ALPHA_ESC' : 0.0,
-        'F_STAR7_MINI' : -2.5,
-        'F_ESC7_MINI' : -1.5,
-        'L_X' : 40.5,
-        'NU_X_THRESH' : 500,
-        'L_X_MINI' : 41.5,
+        'F_ESC10' : -1.436406285418101891e+00,
+        'ALPHA_ESC' : -3.880970616506501658e-01,
+        'F_STAR7_MINI' : -3.486100443946268168e+00,
+        'F_ESC7_MINI' : -1.322516427758474222e+00,
+        'L_X' : 4.075620393700057065e+01,
+        'NU_X_THRESH' : 1.888841167211549532e+02,
+        'L_X_MINI' : 3.914015425313102980e+01,
     }
 #    astro_params = {
 #        'F_STAR10' : -1.30,
@@ -247,7 +247,7 @@ while True:
     #f_rescale_slope_now = params_this[11]
     log10_f_rescale_now = None
     f_rescale_slope_now = None
-    cosmo_params['SIGMA_8'] = 0.8118
+    cosmo_params['SIGMA_8'] = 8.229811145078346213e-01
     parameter_names = list(astro_params.keys()) + ['SIGMA_8', 'log10_f_rescale', 'f_rescale_slope']
     astro_params_now = AstroParams(astro_params)
     cosmo_params_now = CosmoParams(cosmo_params)
