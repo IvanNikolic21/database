@@ -319,6 +319,31 @@ class HDF5saver:
         )
         f.close()
 
+    def add_UV_correct(self, UV, z):
+        """Add UVLF data for a given redshift."""
+        f = h5py.File(self.filename, 'a')
+        if "UV_correct" not in f.keys():
+            uv_group = f.create_group("UV_correct")
+        else:
+            uv_group = f["UV_correct"]
+        uv_group.create_group("UV_correct%d"%(z))
+        uv_group["UV_correct%d"%(z)].create_dataset(
+            "Muv",
+            dtype="float",
+            data = UV[0],
+        )
+        uv_group["UV_correct%d"%(z)].create_dataset(
+            "lfunc",
+            dtype = "float",
+            data = UV[1]
+        )
+        uv_group["UV_correct%d"%(z)].create_dataset(
+            "mhalo",
+            dtype="float",
+            data= UV[2]
+        )
+        f.close()
+
     def add_tau(self, tau_value):
         """Add optical depth value"""
         f = h5py.File(self.filename, 'a')
